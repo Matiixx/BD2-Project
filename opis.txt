@@ -1,0 +1,19 @@
+Przetwarzanie danych typu CLOB. 
+
+Uzytkownik ma wgląd do swoich dokumentów w repozytorium. Może dodawać nowe dokumenty, edytować, usuwać. Dostępne będzie także wyszukiwanie dokumentów po tekście. 
+
+Lista podstawowych funkcjonalności biblioteki:
+- Dodawanie nowego dokumentu do repozytorium
+- Edycja istniejącego dokumentu
+- Usunięcie dokumentu
+- Wyszukanie dokumentu 
+- Sortowanie dokumentów
+- Logowanie użytkownika
+- Rejestracja użytkownika
+
+Aplikacja testowa:
+- Dodawanie nowego dokumentu do repozytorium
+- Edycja istniejącego dokumentu
+- Usunięcie dokumentu
+- Wyszukanie dokumentu 
+- Sortowanie dokumentów

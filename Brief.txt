@@ -1,0 +1,15 @@
+TEMAT: Przetwarzanie danych typu CLOB
+- Opracowanie API do przetwarzania danych typu CLOB. Zapis, edycja, usuwanie dokumentów przez użytkownika. Możliwość wyszukiwania łancucha znaków w dokumentach.
+
+TECHNOLOGIA: C#, ADO.NET
+
+DOKUMENTACJA:
+ opis problemu i opis funkcjonalności udostęnianej przez API,
+ opis typów danych oraz metod ( funkcji ) udostępnionych w ramach API,
+ opis implementacji udostępnionego API przez bibliotekę,
+ prezentacja przeprowadzonych testów jednostkowych,
+ prezentacja przykładowej aplikacji,
+ podsumowanie i wnioski,
+ literatura,
+ dołaczone kody żródłowe wszystkich skryptów T-SQL wykorzystanych w projekcie (np. tworzenie testowej  bazy danych) oraz aplikacji w C#.
+
