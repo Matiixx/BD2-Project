@@ -86,10 +86,48 @@ namespace ProjectAPI
             }
         }
 
-        private int[] searchDocumentIdByText(string textToSearch, string login, string connectionString)
+        private List<PUserDocuments> searchDocumentsByText(string textToSearch, string login, string connectionString)
         {
 
-            var indexes = new System.Collections.Generic.List<int>();
+            var docs = new System.Collections.Generic.List<PUserDocuments>();
+            int user_id = getUserId(login, connectionString);
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                SqlCommand com = new SqlCommand("SELECT * FROM [ProjectTest].[dbo].[Document] WHERE user_id=@user_id AND document LIKE @textToSearch;", connection);
+
+                com.Parameters.Add("@user_id", SqlDbType.Int);
+                com.Parameters["@user_id"].Value = user_id;
+                com.Parameters.Add("@textToSearch", SqlDbType.Text);
+                com.Parameters["@textToSearch"].Value = '%' + textToSearch + '%';
+
+                connection.Open();
+                var res = com.ExecuteReader();
+                while (res.Read())
+                {
+                    docs.Add(new PUserDocuments
+                    {
+                        id = ((int)res["id"]),
+                        name = ((string)res["name"]).Trim(),
+                        document = (string)res["document"]
+                    });
+                }
+
+                connection.Close();
+            }
+            return docs;
+        }
+
+        public List<PUserDocuments> searchDocumentsByText(string textToSearch)
+        {
+            isUserLoggedIn();
+            return searchDocumentsByText(textToSearch, this.login, this.connectionString);
+        }
+
+        private int[] searchDocumentIdsByText(string textToSearch, string login, string connectionString)
+        {
+
+            var docs = new System.Collections.Generic.List<int>();
             int user_id = getUserId(login, connectionString);
 
             using (SqlConnection connection = new SqlConnection(connectionString))
@@ -105,17 +143,18 @@ namespace ProjectAPI
                 var res = com.ExecuteReader();
                 while (res.Read())
                 {
-                    indexes.Add(res.GetInt32(0));
+                    docs.Add((int)res["id"]);
                 }
+
                 connection.Close();
             }
-            return indexes.ToArray();
+            return docs.ToArray();
         }
 
-        public int[] searchDocumentIdByText(string textToSearch) 
+        public int[] searchDocumentIdsByText(string textToSearch)
         {
             isUserLoggedIn();
-            return searchDocumentIdByText(textToSearch, this.login, this.connectionString);
+            return searchDocumentIdsByText(textToSearch, this.login, this.connectionString);
         }
 
         private string[] searchDocumentNamesByText(string textToSearch, string login, string connectionString)
@@ -192,7 +231,7 @@ namespace ProjectAPI
             return getUserDocuments(this.login, this.connectionString);
         }
 
-        private int updateNameOfDocument(int documentId, string newName, string login, string connectionString )
+        private int updateNameOfDocument(int documentId, string newName, string login, string connectionString)
         {
             int user_id = getUserId(login, connectionString);
 
@@ -210,7 +249,7 @@ namespace ProjectAPI
                 connection.Open();
                 int res = com.ExecuteNonQuery();
                 connection.Close();
-                if(res == 0)
+                if (res == 0)
                 {
                     throw new Exception("Wrong doument ID");
                 }
@@ -221,7 +260,7 @@ namespace ProjectAPI
         public int updateNameOfDocument(int documentId, string newName)
         {
             isUserLoggedIn();
-            if(newName.Length == 0)
+            if (newName.Length == 0)
             {
                 throw new Exception("Wrong document name");
             }

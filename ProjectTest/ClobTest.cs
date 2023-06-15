@@ -87,7 +87,7 @@ namespace ProjectTest
         public void TestSearchDocumentByTextWithoutLoggedIn()
         {
             var pf = new ProjectFunctions(this.connectionString);
-            pf.searchDocumentIdByText("Text to find");
+            pf.searchDocumentsByText("Text to find");
         }
 
         [TestMethod]
@@ -104,7 +104,32 @@ namespace ProjectTest
             pf.createClobObjectFromString(document + "1", name);
             pf.createClobObjectFromString(document + "2", name);
             pf.createClobObjectFromString("DifferentDoc", name);
-            Assert.AreEqual(3, pf.searchDocumentIdByText(document).Length);
+            Assert.AreEqual(3, pf.searchDocumentsByText(document).Count);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(System.Exception))]
+        public void TestSearchDocumentIdByTextWithoutLoggedIn()
+        {
+            var pf = new ProjectFunctions(this.connectionString);
+            pf.searchDocumentIdsByText("Text to find");
+        }
+
+        [TestMethod]
+        public void TestSearchDocumentIdByText()
+        {
+            var pf = new ProjectFunctions(this.connectionString);
+            string login = generateRandomString(10);
+            string password = generateRandomString(12);
+            pf.createUser(login, password);
+            pf.loginUser(login, password);
+            string document = "String";
+            string name = "Doc1";
+            pf.createClobObjectFromString(document, name);
+            pf.createClobObjectFromString(document + "1", name);
+            pf.createClobObjectFromString(document + "2", name);
+            pf.createClobObjectFromString("DifferentDoc", name);
+            Assert.AreEqual(3, pf.searchDocumentIdsByText(document).Length);
         }
 
         [TestMethod]

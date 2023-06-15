@@ -12,19 +12,19 @@ namespace ProjectApp
     {
 
         static bool isLoggedIn = false;
-        
+
         static void Main(string[] args)
         {
             string connectionString = "Data Source=WINSERV01;Initial Catalog=ProjectTest;Integrated Security=True;Persist Security Info=False;Pooling=False;MultipleActiveResultSets=False;Connect Timeout=60;Encrypt=False;TrustServerCertificate=False";
             ProjectFunctions pf = new ProjectFunctions(connectionString);
 
 
-            while(true)
+            while (true)
             {
                 Console.Clear();
 
                 int option;
-                if(isLoggedIn == false)
+                if (isLoggedIn == false)
                 {
 
                     Console.Write(@"1 - Zaloguj sie
@@ -34,12 +34,13 @@ namespace ProjectApp
                     try
                     {
                         option = int.Parse(Console.ReadLine());
-                    } catch (FormatException)
+                    }
+                    catch (FormatException)
                     {
                         continue;
                     }
 
-                    switch(option)
+                    switch (option)
                     {
                         case 1:
                             Console.Clear();
@@ -49,10 +50,10 @@ namespace ProjectApp
                             string password = Console.ReadLine();
                             try
                             {
-                                if(pf.loginUser(login, password))
+                                if (pf.loginUser(login, password))
                                 {
                                     isLoggedIn = true;
-                                } 
+                                }
                             }
                             catch (Exception e)
                             {
@@ -70,7 +71,8 @@ namespace ProjectApp
                             try
                             {
                                 pf.createUser(login, password);
-                            } catch (Exception e)
+                            }
+                            catch (Exception e)
                             {
                                 Console.WriteLine(e.Message);
                                 Console.ReadLine();
@@ -82,10 +84,13 @@ namespace ProjectApp
                             break;
 
                     }
-                } else
+                }
+                else
                 {
                     Console.Write(@"1 - Wypisz swoje dokumenty
 2 - Dodaj nowy dokument
+3 - Szukaj dokumenty po nazwie
+4 - Szukaj dokumenty z tesktem
 0 - Wyjdz z programu
 ");
                     try
@@ -102,15 +107,24 @@ namespace ProjectApp
                         case 1:
                             Console.Clear();
                             var res = pf.getUserDocuments();
-                            foreach(var r in res)
+                            foreach (var r in res)
                             {
                                 Console.WriteLine("[" + r.id + "]");
-                                Console.WriteLine(r.name);
+                                Console.WriteLine("Nazwa dokumentu: " + r.name);
+                                Console.WriteLine("===============");
                                 Console.WriteLine(r.document);
                                 Console.WriteLine("---------------");
                             }
-                            Console.WriteLine(@"[id] - Akcje z dokumentem
+                            if (res.Count == 0)
+                            {
+                                Console.WriteLine(@"Brak dokumentow
 0 - Powrot");
+                            }
+                            else
+                            {
+                                Console.WriteLine(@"[id] - Akcje z dokumentem
+0 - Powrot");
+                            }
 
                             try
                             {
@@ -121,17 +135,21 @@ namespace ProjectApp
                                 continue;
                             }
                             if (option == 0) break;
-                            else if(!res.Where(item => item.id == option).Any())
+                            else if (!res.Where(item => item.id == option).Any())
                             {
                                 break;
-                            } else
+                            }
+                            else
                             {
                                 var elem = res.Where(item => item.id == option).First();
+                                Console.Clear();
                                 Console.WriteLine("[" + elem.id + "]");
-                                Console.WriteLine(elem.name);
+                                Console.WriteLine("Nazwa dokumentu: " + elem.name);
+                                Console.WriteLine("===============");
                                 Console.WriteLine(elem.document);
                                 Console.WriteLine("---------------");
                                 Console.WriteLine(@"1 - Usun dokument
+2 - Zmien nazwe dokumentu
 0 - Powrot");
                                 try
                                 {
@@ -141,21 +159,38 @@ namespace ProjectApp
                                 {
                                     continue;
                                 }
-                                if (option == 1)
+                                switch (option)
                                 {
-                                    try
-                                    {
-                                        pf.deleteDocumentWithId(elem.id);
-                                    } catch(Exception e)
-                                    {
-                                        Console.WriteLine(e.Message);
-                                        Console.ReadLine();
-                                    }
+                                    case 1:
+                                        try
+                                        {
+                                            pf.deleteDocumentWithId(elem.id);
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            Console.WriteLine(e.Message);
+                                            Console.ReadLine();
+                                        }
+                                        break;
+
+                                    case 2:
+                                        Console.Clear();
+                                        Console.WriteLine("Stara nazwa dokumentu: " + elem.name);
+                                        Console.Write("Wpisz nowa nazwe dokumentu: ");
+                                        string newName = Console.ReadLine();
+                                        try
+                                        {
+                                            pf.updateNameOfDocument(elem.id, newName);
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            Console.WriteLine(e.Message);
+                                            Console.ReadLine();
+                                        }
+                                        break;
                                 }
                                 break;
-
                             }
-                            break;
                         case 2:
                             Console.Clear();
                             Console.Write("Nazwa dokumentu: ");
@@ -166,16 +201,17 @@ namespace ProjectApp
                             while (true)
                             {
                                 ConsoleKeyInfo keyInfo = Console.ReadKey();
-                                if(keyInfo.Key == ConsoleKey.Enter)
+                                if (keyInfo.Key == ConsoleKey.Enter)
                                 {
-                                    if(previousEnter)
+                                    if (previousEnter)
                                     {
                                         break;
                                     }
                                     previousEnter = true;
                                     Console.Write('\n');
                                     sb.Append('\n');
-                                } else
+                                }
+                                else
                                 {
                                     previousEnter = false;
                                     sb.Append(keyInfo.KeyChar);
@@ -184,33 +220,200 @@ namespace ProjectApp
                             try
                             {
                                 pf.createClobObjectFromString(sb.ToString(), name);
-                            } catch(Exception e)
+                            }
+                            catch (Exception e)
                             {
                                 Console.WriteLine(e.Message);
                                 Console.ReadLine();
                             }
                             break;
+
+                        case 3:
+                            Console.Clear();
+                            Console.Write("Szkuana nazwa dokumentu: ");
+                            string searchName = Console.ReadLine();
+                            res = pf.searchDocumentByName(searchName);
+                            foreach (var r in res)
+                            {
+                                Console.WriteLine("[" + r.id + "]");
+                                Console.WriteLine("Nazwa dokumentu: " + r.name);
+                                Console.WriteLine("===============");
+                                Console.WriteLine(r.document);
+                                Console.WriteLine("---------------");
+                            }
+                            if (res.Count == 0)
+                            {
+                                Console.WriteLine(@"Brak dokumentow
+0 - Powrot");
+                            }
+                            else
+                            {
+                                Console.WriteLine(@"[id] - Akcje z dokumentem
+0 - Powrot");
+                            }
+
+                            try
+                            {
+                                option = int.Parse(Console.ReadLine());
+                            }
+                            catch (FormatException)
+                            {
+                                continue;
+                            }
+                            if (option == 0) break;
+                            else if (!res.Where(item => item.id == option).Any())
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                var elem = res.Where(item => item.id == option).First();
+                                Console.Clear();
+                                Console.WriteLine("[" + elem.id + "]");
+                                Console.WriteLine("Nazwa dokumentu: " + elem.name);
+                                Console.WriteLine("===============");
+                                Console.WriteLine(elem.document);
+                                Console.WriteLine("---------------");
+                                Console.WriteLine(@"1 - Usun dokument
+2 - Zmien nazwe dokumentu
+0 - Powrot");
+                                try
+                                {
+                                    option = int.Parse(Console.ReadLine());
+                                }
+                                catch (FormatException)
+                                {
+                                    continue;
+                                }
+                                switch (option)
+                                {
+                                    case 1:
+                                        try
+                                        {
+                                            pf.deleteDocumentWithId(elem.id);
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            Console.WriteLine(e.Message);
+                                            Console.ReadLine();
+                                        }
+                                        break;
+
+                                    case 2:
+                                        Console.Clear();
+                                        Console.WriteLine("Stara nazwa dokumentu: " + elem.name);
+                                        Console.Write("Wpisz nowa nazwe dokumentu: ");
+                                        string newName = Console.ReadLine();
+                                        try
+                                        {
+                                            pf.updateNameOfDocument(elem.id, newName);
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            Console.WriteLine(e.Message);
+                                            Console.ReadLine();
+                                        }
+                                        break;
+                                }
+                                break;
+                            }
+
+                        case 4:
+                            Console.Clear();
+                            Console.Write("Szkuana fraza w dokumencie: ");
+                            string searchText = Console.ReadLine();
+                            res = pf.searchDocumentsByText(searchText);
+                            foreach (var r in res)
+                            {
+                                Console.WriteLine("[" + r.id + "]");
+                                Console.WriteLine("Nazwa dokumentu: " + r.name);
+                                Console.WriteLine("===============");
+                                Console.WriteLine(r.document);
+                                Console.WriteLine("---------------");
+                            }
+                            if (res.Count == 0)
+                            {
+                                Console.WriteLine(@"Brak dokumentow
+0 - Powrot");
+                            }
+                            else
+                            {
+                                Console.WriteLine(@"[id] - Akcje z dokumentem
+0 - Powrot");
+                            }
+
+                            try
+                            {
+                                option = int.Parse(Console.ReadLine());
+                            }
+                            catch (FormatException)
+                            {
+                                continue;
+                            }
+                            if (option == 0) break;
+                            else if (!res.Where(item => item.id == option).Any())
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                var elem = res.Where(item => item.id == option).First();
+                                Console.Clear();
+                                Console.WriteLine("[" + elem.id + "]");
+                                Console.WriteLine("Nazwa dokumentu: " + elem.name);
+                                Console.WriteLine("===============");
+                                Console.WriteLine(elem.document);
+                                Console.WriteLine("---------------");
+                                Console.WriteLine(@"1 - Usun dokument
+2 - Zmien nazwe dokumentu
+0 - Powrot");
+                                try
+                                {
+                                    option = int.Parse(Console.ReadLine());
+                                }
+                                catch (FormatException)
+                                {
+                                    continue;
+                                }
+                                switch (option)
+                                {
+                                    case 1:
+                                        try
+                                        {
+                                            pf.deleteDocumentWithId(elem.id);
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            Console.WriteLine(e.Message);
+                                            Console.ReadLine();
+                                        }
+                                        break;
+
+                                    case 2:
+                                        Console.Clear();
+                                        Console.WriteLine("Stara nazwa dokumentu: " + elem.name);
+                                        Console.Write("Wpisz nowa nazwe dokumentu: ");
+                                        string newName = Console.ReadLine();
+                                        try
+                                        {
+                                            pf.updateNameOfDocument(elem.id, newName);
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            Console.WriteLine(e.Message);
+                                            Console.ReadLine();
+                                        }
+                                        break;
+                                }
+                                break;
+                            }
+
+                        case 0:
+                            Environment.Exit(0);
+                            break;
                     }
-                } 
-
                 }
-
-            //Console.WriteLine(pf.loginUser("Mateuszek", "login1"));
-            //pf.updatePassword("login", "login1");
-
-            ////string doc = "asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234asdsadas asdsad sads dad132d 23d23 234";
-            //////Console.WriteLine(pf.createUser("asdasd", "asdasd"));
-            //////Console.WriteLine(pf.createClobObjectFromString(doc, "Mateuszek", "Mateuszek"));
-            ////Console.WriteLine(pf.createClobObjectFromFile("C:\\Users\\Administrator\\Desktop\\BD2\\ProjectApp\\doc.odt", "TestDocument", "Mateuszek"));
-            //var list = pf.getUserDocuments();
-            //foreach (var i in list)
-            //{
-            //    Console.WriteLine(i.document.Length);
-            //}
-
-            //////generateStringToFile("data2.txt", 500000);
-            ////Console.WriteLine("Done");
-            //Console.ReadLine();
+            }
         }
 
         static void generateStringToFile(string filepath, int numOfStrings)
@@ -232,7 +435,7 @@ namespace ProjectApp
             const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n";
 
             char[] stringChars = new char[length];
-            for ( int i = 0; i < length; i++)
+            for (int i = 0; i < length; i++)
             {
                 stringChars[i] = chars[random.Next(chars.Length)];
             }

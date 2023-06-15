@@ -193,7 +193,7 @@ namespace ProjectAPI
                 count = (int)com.ExecuteScalar();
                 connection.Close();
             }
-            if(count == 0)
+            if (count == 0)
             {
                 throw new Exception("Wrong password");
             }
