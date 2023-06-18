@@ -88,9 +88,10 @@ namespace ProjectApp
                 else
                 {
                     Console.Write(@"1 - Wypisz swoje dokumenty
-2 - Dodaj nowy dokument
-3 - Szukaj dokumenty po nazwie
-4 - Szukaj dokumenty z tesktem
+2 - Dodaj nowy dokument z konsoli
+3 - Dodaj nowy dokument z pliku
+4 - Szukaj dokumenty po nazwie
+5 - Szukaj dokumenty z tesktem
 0 - Wyjdz z programu
 ");
                     try
@@ -230,6 +231,22 @@ namespace ProjectApp
 
                         case 3:
                             Console.Clear();
+                            Console.Write("Podaj nazwe dokumentu: ");
+                            name = Console.ReadLine();
+                            Console.Write("Podaj sciezke do pliku tekstowego: ");
+                            string path = Console.ReadLine();
+                            try
+                            {
+                                pf.createClobObjectFromFile(path, name);
+                            } catch(Exception e)
+                            {
+                                Console.WriteLine(e.Message);
+                                Console.ReadLine();
+                            }
+                            break;
+
+                        case 4:
+                            Console.Clear();
                             Console.Write("Szkuana nazwa dokumentu: ");
                             string searchName = Console.ReadLine();
                             res = pf.searchDocumentByName(searchName);
@@ -318,7 +335,7 @@ namespace ProjectApp
                                 break;
                             }
 
-                        case 4:
+                        case 5:
                             Console.Clear();
                             Console.Write("Szkuana fraza w dokumencie: ");
                             string searchText = Console.ReadLine();
